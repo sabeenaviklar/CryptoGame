@@ -1,0 +1,330 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crypto Crash Game - Frontend Demo</title>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #eee;
+      text-align: center;
+      padding: 30px;
+      margin: 0;
+    }
+    h1 {
+      color: #ffcc00;
+      margin-bottom: 20px;
+    }
+    #multiplier {
+      font-size: 64px;
+      font-weight: bold;
+      color: #00ff00;
+      margin-bottom: 20px;
+    }
+    #cashoutBtn {
+      padding: 15px 40px;
+      font-size: 22px;
+      background-color: #ff6700;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.25s ease;
+    }
+    #cashoutBtn:hover {
+      background-color: #e55a00;
+    }
+    #cashoutBtn:disabled {
+      background-color: #444;
+      cursor: not-allowed;
+    }
+    #logs {
+      margin-top: 30px;
+      max-height: 300px;
+      overflow-y: auto;
+      background: #222;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: left;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    .log-entry {
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Crypto Crash Game (Demo Frontend)</h1>
+  <div>Current Multiplier: <span id="multiplier">1.00x</span></div>
+  <br />
+  <button id="cashoutBtn" disabled>Cash Out Now</button>
+
+  <div id="logs"></div>
+
+  <script>
+    // Connect to the Socket.IO server (adjust URL if needed)
+    const socket = io();
+
+    const multiplierEl = document.getElementById('multiplier');
+    const cashoutBtn = document.getElementById('cashoutBtn');
+    const logsEl = document.getElementById('logs');
+
+    // Replace with your actual player ID (from DB)
+    const playerId = prompt("Enter your player ID (use valid MongoDB _id):") || "demo-player-id";
+
+    let currentRoundId = null;
+    let currentMultiplier = 1;
+
+    // Logging helper
+    function log(message) {
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      logsEl.prepend(entry);
+      if (logsEl.childNodes.length > 100) {
+        logsEl.removeChild(logsEl.lastChild);
+      }
+    }
+
+    socket.on('connect', () => {
+      log(`Connected to server with socket ID: ${socket.id}`);
+    });
+
+    socket.on('round_start', (data) => {
+      currentRoundId = data.roundId || data.roundId?.toString() || null;
+      currentMultiplier = 1;
+      multiplierEl.textContent = `${currentMultiplier.toFixed(2)}x`;
+      log(`Round started. Round ID: ${currentRoundId}`);
+      cashoutBtn.disabled = false;
+    });
+
+    socket.on('multiplier', (data) => {
+      currentMultiplier = parseFloat(data.value);
+      multiplierEl.textContent = `${currentMultiplier.toFixed(2)}x`;
+    });
+
+    socket.on('cashout', (data) => {
+      log(`Player ${data.playerId} cashed out with multiplier ${data.multiplier} and payout $${data.payoutUSD?.toFixed(2) || "N/A"}`);
+    });
+
+    socket.on('crash', (data) => {
+      log(`Game crashed at multiplier: ${data.point}`);
+      cashoutBtn.disabled = true;
+      currentMultiplier = 1;
+      multiplierEl.textContent = `${currentMultiplier.toFixed(2)}x`;
+    });
+
+    cashoutBtn.addEventListener('click', () => {
+      if (!currentRoundId) {
+        alert("No active round to cash out from!");
+        return;
+      }
+      socket.emit('cashout', {
+        playerId: playerId,
+        roundId: currentRoundId
+      });
+      log(`Sent cashout request for round ${currentRoundId} by player ${playerId}`);
+      cashoutBtn.disabled = true; // Disable until next round
+    });
+  </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Crypto Crash Game - Frontend Card UI</title>
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <style>
+    body {
+      background: #191c24;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0; padding: 0;
+      display: flex; justify-content: center; align-items: center; height: 100vh;
+    }
+    .card {
+      background: #242730;
+      border-radius: 16px;
+      box-shadow: 0 2px 24px rgba(0,0,0,0.2);
+      padding: 32px 40px 32px 40px;
+      width: 340px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .multiplier {
+      font-size: 48px;
+      font-weight: bold;
+      color: #fff;
+      margin-top: 6px;
+      margin-bottom: 18px;
+      letter-spacing: 1px;
+    }
+    .section {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .label {
+      color: #b0bac9;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .input, .value {
+      color: #fff;
+      background: #191c24;
+      border: none;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 16px;
+      outline: none;
+      width: 120px;
+      box-sizing: border-box;
+    }
+    .input[disabled] {
+      opacity: 0.6;
+    }
+    .cashout {
+      width: 100%;
+      margin: 22px 0 12px 0;
+      padding: 12px;
+      background: #1877ff;
+      color: #fff;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .cashout:disabled {
+      background: #50597b;
+      cursor: not-allowed;
+    }
+    #summary {
+      width: 100%;
+      color: #ffc94b;
+      font-size: 18px;
+      text-align: left;
+      margin-top: 6px;
+      margin-bottom: 2px;
+    }
+    .status {
+      font-size: 14px;
+      color: #62e56d;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="multiplier" id="multiplier">1.00x</div>
+    <div class="section">
+      <div>
+        <div class="label">Bet Amount</div>
+        <input class="input" id="betAmount" type="number" min="1" value="10" />
+      </div>
+      <div>
+        <div class="label">Price (BTC)</div>
+        <input class="input" id="btcPrice" type="text" value="0.00 USD" disabled />
+      </div>
+    </div>
+    <button class="cashout" id="cashoutBtn" disabled>Cash Out</button>
+    <div class="section">
+      <div>
+        <div class="label">Profit</div>
+        <div class="value" id="profit">0.00 USD</div>
+      </div>
+      <div>
+        <div class="label">Status</div>
+        <div class="status" id="status">WAITING</div>
+      </div>
+    </div>
+    <div id="summary"></div>
+  </div>
+  <script>
+    // Replace with backend emit/receive logic as before
+    const socket = io();
+    let multiplier = 1;
+    let cashedOut = false;
+    let running = false;
+
+    // Setup bet amount, price mock (auto-updated via API as needed)
+    const multiplierEl = document.getElementById('multiplier');
+    const betAmountEl = document.getElementById('betAmount');
+    const btcPriceEl = document.getElementById('btcPrice');
+    const profitEl = document.getElementById('profit');
+    const statusEl = document.getElementById('status');
+    const summaryEl = document.getElementById('summary');
+    const cashoutBtn = document.getElementById('cashoutBtn');
+    let currentRoundId = null;
+    let price = 64315.23; // For demo, replace by fetching CoinGecko price every 10s
+
+    btcPriceEl.value = price.toLocaleString('en-US') + ' USD';
+
+    function updateProfit() {
+      const amount = parseFloat(betAmountEl.value) || 0;
+      profitEl.textContent = ((amount * (multiplier - 1)).toFixed(2)) + " USD";
+    }
+
+    // Enable bet
+    socket.on('round_start', (data) => {
+      multiplier = 1;
+      running = true;
+      cashedOut = false;
+      currentRoundId = data.roundId;
+      multiplierEl.textContent = `${multiplier.toFixed(2)}x`;
+      betAmountEl.disabled = false;
+      cashoutBtn.disabled = false;
+      statusEl.textContent = "RUNNING";
+      updateProfit();
+      summaryEl.textContent = "";
+    });
+
+    // Multiplier updates
+    socket.on('multiplier', (data) => {
+      multiplier = parseFloat(data.value);
+      multiplierEl.textContent = `${multiplier.toFixed(2)}x`;
+      updateProfit();
+    });
+
+    // Cashout event feedback for any player (could show yours separately)
+    socket.on('cashout', (data) => {
+      if (data.playerId === "your-player-id") {
+        summaryEl.textContent = `You cashed out at ${data.multiplier.toFixed(2)}x: $${data.payoutUSD.toFixed(2)}`;
+        statusEl.textContent = "CASHED OUT";
+        cashoutBtn.disabled = true;
+        cashedOut = true;
+      }
+    });
+
+    // Round crash: reset UI
+    socket.on('crash', (data) => {
+      statusEl.textContent = "CRASHED";
+      summaryEl.textContent = `Game crashed at ${data.point}x.`;
+      multiplier = 1;
+      multiplierEl.textContent = `${multiplier.toFixed(2)}x`;
+      cashoutBtn.disabled = true;
+      running = false;
+    });
+
+    // Demo: Allow cashout
+    cashoutBtn.onclick = function () {
+      if (!running || cashedOut) return;
+      socket.emit('cashout', {
+        playerId: "your-player-id",     // Use real playerId!
+        roundId: currentRoundId
+      });
+      summaryEl.textContent = `Cashout requested! Waiting for server...`;
+      cashoutBtn.disabled = true;
+      statusEl.textContent = "CASHOUT REQUESTED";
+    };
+  </script>
+</body>
+</html>
