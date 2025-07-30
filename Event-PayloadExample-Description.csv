@@ -1,0 +1,5 @@
+"Event","Payload Example","Description"
+"round_start","{ ""roundId"": ""6"" }","New round has started"
+"multiplier","{ ""value"": ""1.37"" }","Multiplier updated every 100ms"
+"crash","{ ""point"": 8.04 }","Crash point for this round"
+"cashout","{ ""playerId"":""..."", ""multiplier"":2.6, ""payoutUSD"":26 }","Player has cashed out"

@@ -1,14 +1,32 @@
 {
+  "name": "crypto-crash-backend",
+  "version": "1.0.0",
+  "description": "Backend for Crypto Crash game with realtime Socket.IO and crypto price integration",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
     "axios": "^1.11.0",
     "cors": "^2.8.5",
-    "crypto": "^1.0.1",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
-    "http": "^0.0.1-security",
     "mongoose": "^8.17.0",
-    "router": "^2.2.0",
     "socket.io": "^4.8.1"
-  }
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "crypto",
+    "crash-game",
+    "backend",
+    "nodejs",
+    "express",
+    "socket.io",
+    "mongodb"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
 }
